@@ -36,6 +36,19 @@ pub fn build(b: *std.build.Builder) !void {
     const facil_install_step = b.addInstallArtifact(facil_lib, .{});
     b.getInstallStep().dependOn(&facil_install_step.step);
 
+    const docs_obj = b.addObject(.{
+        .name = "docs",
+        .root_source_file = .{ .path = "src/zap.zig" },
+        .target = target,
+        .optimize = .Debug,
+    });
+    const install_docs = b.addInstallDirectory(.{
+        .install_dir = .prefix,
+        .install_subdir = "docs",
+        .source_dir = docs_obj.getEmittedDocs(),
+    });
+    b.step("docs", "Build docs").dependOn(&install_docs.step);
+
     const all_step = b.step("all", "build all examples");
 
     inline for ([_]struct {
